@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .status {
+            font-size: 24px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="status">Application is running</div>
+    <div id="system-time">System Time: Loading...</div>
+    <div id="go-version">Go Version: Loading...</div>
+    <div id="nomad-status">Nomad API Status: Loading...</div>
+    <div id="service-status">Jellyfin Status: Loading...</div>
+    <script>
+        function fetchHealthStatus() {
+            fetch('/healthz')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('system-time').innerHTML = data.match(/System Time: (.*)<\/div>/)[1];
+                    document.getElementById('go-version').innerHTML = data.match(/Go Version: (.*)<\/div>/)[1];
+                    document.getElementById('nomad-status').innerHTML = data.match(/Nomad API Status: (.*)<\/div>/)[1];
+                    document.getElementById('service-status').innerHTML = data.match(/Jellyfin Status: (.*)<\/div>/)[1];
+                });
+        }
+
+        setInterval(() => {
+            window.location.reload();
+        }, 5000);
+
+        fetchHealthStatus();
+    </script>
+</body>
+</html>

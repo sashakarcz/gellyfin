@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gellyfin Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #terminal {
+            width: 80%;
+            height: 50vh;
+            background: black;
+            color: green;
+            padding: 10px;
+            overflow-y: scroll;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .health-status {
+            margin-top: 20px;
+            font-size: 16px;
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="restartJob()">Restart Jellyfin Job</button>
+    <div id="terminal"></div>
+    <div class="health-status">
+        <div id="system-time">System Time: Loading...</div>
+        <div id="go-version">Go Version: Loading...</div>
+        <div id="nomad-status">Nomad API Status: Loading...</div>
+        <div id="service-status">Jellyfin Status: Loading...</div>
+    </div>
+    <script src="/static/script.js"></script>
+    <script>
+        function fetchHealthStatus() {
+            fetch('/healthz')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('system-time').innerHTML = `System Time: ${data.time}`;
+                    document.getElementById('go-version').innerHTML = `Go Version: ${data.go_version}`;
+                    document.getElementById('nomad-status').innerHTML = `Nomad API Status: ${data.nomad_status}`;
+                    document.getElementById('service-status').innerHTML = `Jellyfin Status: ${data.service_status}`;
+                })
+                .catch(error => {
+                    console.error('Error fetching health status:', error);
+                });
+        }
+
+        setInterval(fetchHealthStatus, 5000);
+        fetchHealthStatus();
+    </script>
+</body>
+</html>
