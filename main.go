@@ -23,8 +23,8 @@ func main() {
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/healthz", healthzHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	log.Println("Starting server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Starting server on :8888")
+	log.Fatal(http.ListenAndServe(":8888", nil))
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,11 +34,11 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 func restartHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request to restart Jellyfin job")
 	fmt.Fprintf(w, "Restarting Jellyfin job...\n")
-	nomadAddr := "http://192.168.1.169:4646"
+	nomadAddr := "http://consul.service.starnix.net:4646"
 	os.Setenv("NOMAD_ADDR", nomadAddr)
 
 	// Restart the job
-	restartCmd := exec.Command("nomad", "job", "restart", "-yes", "-verbose", "jellyfin")
+	restartCmd := exec.Command("/usr/local/bin/nomad", "job", "restart", "-yes", "-verbose", "jellyfin")
 	restartCmd.Env = append(os.Environ(), "NOMAD_ADDR="+nomadAddr)
 	log.Println("Restarting Jellyfin job")
 	output, err := restartCmd.CombinedOutput()
@@ -57,14 +57,14 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func healthzHandler(w http.ResponseWriter, r *http.Request) {
-	nomadAddr := "http://192.168.1.169:4646/v1/status/leader"
+	nomadAddr := "http://consul.service.starnix.net:4646/v1/status/leader"
 	resp, err := http.Get(nomadAddr)
 	nomadStatus := "Nomad API is reachable"
 	if err != nil || resp.StatusCode != http.StatusOK {
 		nomadStatus = "Nomad API is not reachable"
 	}
 
-	serviceURL := "https://jellyfin.starnix.net"
+	serviceURL := "https://jellyfin.service.starnix.net"
 	serviceResp, err := http.Get(serviceURL)
 	serviceStatus := "Service is reachable"
 	if err != nil || serviceResp.StatusCode != http.StatusOK {

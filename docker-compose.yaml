@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  gellyfin:
+    build: .
+    ports:
+      - "8888:8888"
+    environment:
+      - NOMAD_ADDR=http://192.168.1.169:4646
